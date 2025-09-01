@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nursing Solution</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #0066cc;
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+    .container {
+      width: 80%;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px #ccc;
+    }
+    h2 {
+      color: #0066cc;
+    }
+    input, button {
+      padding: 8px;
+      margin: 5px;
+    }
+    .pdf-list {
+      margin-top: 20px;
+    }
+    .pdf-list a {
+      display: block;
+      margin: 5px 0;
+      text-decoration: none;
+      color: #0066cc;
+    }
+    .logout-btn {
+      background: red;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📘 Nursing Solution</h1>
+  <p>Classes & Notes Portal</p>
+</header>
+
+<div class="container" id="login-section">
+  <h2>🔑 Admin Login</h2>
+  <input type="text" id="username" placeholder="Username"><br>
+  <input type="password" id="password" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
+</div>
+
+<div class="container" id="admin-section" style="display:none;">
+  <h2>📤 Upload PDF (Admin Panel)</h2>
+  <input type="file" id="pdfFile" accept="application/pdf">
+  <button onclick="uploadPDF()">Upload</button>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+
+  <h3>📂 Uploaded PDFs</h3>
+  <div id="pdfListAdmin"></div>
+</div>
+
+<div class="container" id="user-section">
+  <h2>📚 Available Classes & Notes</h2>
+  <div id="pdfListUser"></div>
+</div>
+
+<script>
+  // Dummy login credentials
+  const ADMIN_USER = "suresh9549";
+  const ADMIN_PASS = "suresh9549";
+
+  function login() {
+    let user = document.getElementById("username").value;
+    let pass = document.getElementById("password").value;
+
+    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+      localStorage.setItem("loggedIn", "true");
+      showAdminPanel();
+    } else {
+      alert("Invalid username or password!");
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem("loggedIn");
+    document.getElementById("admin-section").style.display = "none";
+    document.getElementById("login-section").style.display = "block";
+  }
+
+  function showAdminPanel() {
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("admin-section").style.display = "block";
+    loadPDFs();
+  }
+
+  function uploadPDF() {
+    const fileInput = document.getElementById("pdfFile");
+    const file = fileInput.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        let pdfs = JSON.parse(localStorage.getItem("pdfs") || "[]");
+        pdfs.push({ name: file.name, url: e.target.result });
+        localStorage.setItem("pdfs", JSON.stringify(pdfs));
+        loadPDFs();
+        fileInput.value = "";
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function loadPDFs() {
+    let pdfs = JSON.parse(localStorage.getItem("pdfs") || "[]");
+    let adminList = document.getElementById("pdfListAdmin");
+    let userList = document.getElementById("pdfListUser");
+
+    adminList.innerHTML = "";
+    userList.innerHTML = "";
+
+    pdfs.forEach((pdf, index) => {
+      adminList.innerHTML += `<a href="${pdf.url}" target="_blank">${index+1}. ${pdf.name}</a>`;
+      userList.innerHTML += `<a href="${pdf.url}" target="_blank">${index+1}. ${pdf.name}</a>`;
+    });
+  }
+
+  // Check login status
+  if (localStorage.getItem("loggedIn") === "true") {
+    showAdminPanel();
+  }
+  loadPDFs();
+</script>
+
+</body>
+</html>
